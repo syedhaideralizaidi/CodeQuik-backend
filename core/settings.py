@@ -47,6 +47,8 @@ INSTALLED_APPS = [
     'social_django',
     'drf_social_oauth2',
     'corsheaders',
+    'users',
+    'subscription',
 ]
 
 MIDDLEWARE = [
@@ -188,3 +190,50 @@ SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = [
 
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = os.environ.get("SOCIAL_AUTH_GOOGLE_OAUTH2_KEY")
 SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = os.environ.get("SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET")
+
+STRIPE_PRO_SUBSCRIPTION_MONTHLY = os.environ.get(
+    "STRIPE_PRO_SUBSCRIPTION_MONTHLY", default="price_1QzWk2Bld7c7zRyo79LZbO2l"
+)
+
+STRIPE_PRO_50_SUBSCRIPTION_MONTHLY = os.environ.get(
+    "STRIPE_PRO_50_SUBSCRIPTION_MONTHLY", default="price_1QzX4yBld7c7zRyoJ6dh0GTO"
+)
+
+STRIPE_PRO_100_SUBSCRIPTION_MONTHLY = os.environ.get(
+    "STRIPE_PRO_100_SUBSCRIPTION_MONTHLY", default="price_1QzX5ZBld7c7zRyoIOmiDUh7"
+)
+
+STRIPE_PRO_200_SUBSCRIPTION_MONTHLY = os.environ.get(
+    "STRIPE_PRO_200_SUBSCRIPTION_MONTHLY", default="price_1QzX6gBld7c7zRyod9pIFNAm"
+)
+
+STRIPE_PRO_SUBSCRIPTION_MONTHLY_PRICING = {
+    "price": STRIPE_PRO_SUBSCRIPTION_MONTHLY,
+    "quantity": 1,
+}
+
+STRIPE_PRO_50_SUBSCRIPTION_MONTHLY_PRICING = {
+    "price": STRIPE_PRO_50_SUBSCRIPTION_MONTHLY,
+    "quantity": 1,
+}
+
+STRIPE_PRO_100_SUBSCRIPTION_MONTHLY_PRICING = {
+    "price": STRIPE_PRO_100_SUBSCRIPTION_MONTHLY,
+    "quantity": 1,
+}
+
+STRIPE_PRO_200_SUBSCRIPTION_MONTHLY_PRICING = {
+    "price": STRIPE_PRO_200_SUBSCRIPTION_MONTHLY,
+    "quantity": 1,
+}
+
+STRIPE_SUCCESS_URL = os.environ.get("STRIPE_SUCCESS_URL", default="https://dev.codequik.net")
+STRIPE_CANCEL_URL = os.environ.get("STRIPE_SUCCESS_URL", default="https://dev.codequik.net")
+
+STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY", default="sk_test_51PNWpDBld7c7zRyojkuiogUHdGAm71dm01vCVs5vLb6lUIq2hUb75FOetDeYF5PVcZosungflo7yrbqiD8Yc09qb00tDyVWgvw")
+STRIPE_PUBLIC_KEY = os.environ.get("STRIPE_PUBLIC_KEY", default="pk_test_51PNWpDBld7c7zRyon33C4JoOheAQgDAYCF6RkdO5hIbfkXvpfQuWZ19cLul5DIUvrrCI8Kg5wlUb1IGgxi5GQyk500iYcq2wZU")
+
+STRIPE_ENDPOINT_SECRET = os.environ.get(
+    "STRIPE_ENDPOINT_SECRET",
+    default="whsec_2503c03e664ad859c62b28256860e914a08c9c733444a835b9331e1a8a1d1944",
+)
