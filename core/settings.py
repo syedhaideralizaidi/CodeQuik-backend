@@ -31,7 +31,7 @@ SECRET_KEY = 'django-insecure-pj-*m$di8f2h-j-u+4s5-l^hq14j#dv_0100k1ufp7_%wr=3o$
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
-
+CORS_ORIGIN_ALLOW_ALL = True
 
 # Application definition
 
@@ -152,9 +152,6 @@ SIMPLE_JWT = {
     'BLACKLIST_AFTER_ROTATION': True,
 }
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
-]
 
 TEMPLATE_CONTEXT_PROCESSORS = (
     'social_django.context_processors.backends',
