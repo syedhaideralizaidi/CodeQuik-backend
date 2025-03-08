@@ -35,3 +35,16 @@ class User(AbstractUser):
     objects = UserManager()
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
+
+
+
+class UserSubscription(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='user_subscription')  # Each user has one subscription
+    stripe_customer_id = models.CharField(max_length=255, unique=True)
+    stripe_subscription_id = models.CharField(max_length=255, unique=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.stripe_subscription_id}"
