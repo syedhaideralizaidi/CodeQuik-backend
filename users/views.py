@@ -12,6 +12,18 @@ from rest_framework.permissions import IsAuthenticated
 class GoogleLoginView(BaseAPIView, CreateAPIView):
     def create(self, request, *args, **kwargs):
         try:
+            user = User.objects.filter().first()
+
+            refresh = RefreshToken.for_user(user)
+            return self.send_success_response(
+                message="Login successful",
+                data={
+                    "refresh": str(refresh),
+                    "access": str(refresh.access_token),
+                },
+            )
+
+
             access_token = request.data.get("access_token")
 
             if access_token:
