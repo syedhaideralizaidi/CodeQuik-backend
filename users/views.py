@@ -114,12 +114,13 @@ class StripeSubscriptionCheckout(BaseAPIView, CreateAPIView):
             return self.send_bad_request_response(message=str(e))
 
 
-class StripeWebhookView(BaseAPIView, CreateAPIView):
+class StripeWebhookView(CreateAPIView):
     permission_classes = []
     queryset = None
     serializer_class = None
 
     def create(self, request, *args, **kwargs):
+        stripe.api_key = settings.STRIPE_API_KEY
         payload = request.body
         sig_header = request.META["HTTP_STRIPE_SIGNATURE"]
         try:
@@ -136,8 +137,19 @@ class StripeWebhookView(BaseAPIView, CreateAPIView):
             stripe_customer_id = session["customer"]
             stripe_subscription_id = session["subscription"]
 
+            # Fetch subscription details
+            subscription = stripe.Subscription.retrieve(stripe_subscription_id)
+            price_id = subscription["items"]["data"][0]["price"]["id"]
+
+            # Fetch product details
+            price = stripe.Price.retrieve(price_id)
+            product_id = price["product"]
+            product = stripe.Product.retrieve(product_id)
+            product_name = product["name"]  # Get product name
+
             # Ensure user exists
             user = User.objects.get(id=user_id)
+
             # Store subscription details in the database
             UserSubscription.objects.update_or_create(
                 user=user,
