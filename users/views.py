@@ -4,9 +4,9 @@ from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveAPIView
 from common.response_mixins import BaseAPIView
 from rest_framework_simplejwt.tokens import RefreshToken
 import stripe
-from users.models import User, UserSubscription
+from users.models import User, UserSubscription, UserTransaction, UserApiUsage
 from users.serializers import UserDetailSerializer
-from users.utils import validate_google_token
+from users.utils import validate_google_token, get_token_limit
 from rest_framework.permissions import IsAuthenticated
 
 class GoogleLoginView(BaseAPIView, CreateAPIView):
@@ -67,6 +67,7 @@ class GoogleLoginView(BaseAPIView, CreateAPIView):
         except Exception as e:
             return self.send_bad_request_response(message=str(e))
 
+
 class StripeProductListing(BaseAPIView, ListAPIView):
     permission_classes = []
     queryset = None
@@ -76,10 +77,23 @@ class StripeProductListing(BaseAPIView, ListAPIView):
         stripe.api_key = settings.STRIPE_API_KEY
         try:
             products = stripe.Product.list(limit=10)  # Fetch up to 10 products
-            return self.send_success_response(data=products)
+            enriched_products = []
+
+            for product in products['data']:
+                # Fetch prices for each product
+                prices = stripe.Price.list(product=product['id'], limit=1)  # Adjust limit if multiple prices needed
+
+                # Attach the first price if available
+                product['price'] = prices['data'][0] if prices['data'] else None
+
+                # Append the enriched product
+                enriched_products.append(product)
+
+            return self.send_success_response(data=enriched_products)
 
         except Exception as e:
             return self.send_bad_request_response(message=str(e))
+
 
 
 class StripeSubscriptionCheckout(BaseAPIView, CreateAPIView):
@@ -145,13 +159,24 @@ class StripeWebhookView(CreateAPIView):
 
             # Fetch product details
             price = stripe.Price.retrieve(price_id)
+            price_value = subscription["items"]["data"][0]["price"]['unit_amount'] / 100
             product_id = price["product"]
             product = stripe.Product.retrieve(product_id)
             product_name = product["name"]  # Get product name
 
             # Ensure user exists
             user = User.objects.get(id=user_id)
-
+            UserTransaction.objects.create(
+                user=user,
+                amount = price_value,
+                product = product_name,
+            )
+            api_limit = get_token_limit(product_name)
+            UserApiUsage.objects.update_or_create(
+                user=user,
+                total_limit=api_limit,
+                remaining_limit=api_limit,
+            )
             # Store subscription details in the database
             UserSubscription.objects.update_or_create(
                 user=user,
@@ -172,3 +197,28 @@ class UserDetailView(BaseAPIView, RetrieveAPIView):
     def retrieve(self, request, *args, **kwargs):
         serializer = self.get_serializer(instance=request.user)
         return self.send_success_response(data=serializer.data)
+
+
+class UserApiUsageView(BaseAPIView, CreateAPIView):
+    permission_classes = [IsAuthenticated]
+    queryset = None
+    serializer_class = UserDetailSerializer
+
+    def create(self, request, *args, **kwargs):
+        token_count = request.data.get('token_count')
+        if not isinstance(token_count, int):
+            return self.send_bad_request_response(message="Token count must be an integer.")
+        user_api_usage, created = UserApiUsage.objects.get_or_create(
+            user=request.user,
+        )
+        if user_api_usage.remaining_limit < token_count:
+            return self.send_bad_request_response(message="User can't have token limit. Not enough remaining tokens.")
+
+            # Deduct tokens and save
+        user_api_usage.remaining_limit -= token_count
+        user_api_usage.save()
+
+        # Optionally return remaining limit or success message
+        return self.send_success_response(message="Tokens deducted successfully.", data={
+            "remaining_limit": user_api_usage.remaining_limit
+        })

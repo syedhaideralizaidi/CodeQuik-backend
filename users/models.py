@@ -48,3 +48,15 @@ class UserSubscription(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.stripe_subscription_id}"
+
+class UserApiUsage(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='api_usage')
+    total_limit = models.PositiveIntegerField(default=1000)
+    product = models.CharField(max_length=255)
+    remaining_limit = models.PositiveIntegerField(default=1000)
+
+
+class UserTransaction(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_transaction')
+    amount = models.FloatField()
+    product = models.CharField(max_length=255)
