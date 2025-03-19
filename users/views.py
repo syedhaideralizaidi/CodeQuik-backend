@@ -40,10 +40,8 @@ class GoogleLoginView(BaseAPIView, CreateAPIView):
                 if token_info and token_info.get("email"):
                     user = User.objects.filter(email=token_info["email"]).first()
                     if not user:
-                        name = token_info["name"].split(" ", 1)
-                        user = User.objects.create_user(
-                            first_name=name[0],
-                            last_name=name[1] if len(name) > 1 else "",
+                        user = User.objects.create(
+                            full_name=token_info.get('name', None),
                             email=token_info["email"],
                             password=None,  # Don't set a hardcoded password
                         )
