@@ -13,20 +13,20 @@ class GoogleLoginView(BaseAPIView, CreateAPIView):
     def create(self, request, *args, **kwargs):
         try:
             access_token = request.data.get("access_token")
-            print(access_token)
-            user = User.objects.filter().first()
-
-            refresh = RefreshToken.for_user(user)
-            return self.send_success_response(
-                message="Login successful",
-                data={
-                    "refresh": str(refresh),
-                    "access": str(refresh.access_token),
-                },
-            )
-
-
-
+            # print(access_token)
+            # user = User.objects.filter().first()
+            #
+            # refresh = RefreshToken.for_user(user)
+            # return self.send_success_response(
+            #     message="Login successful",
+            #     data={
+            #         "refresh": str(refresh),
+            #         "access": str(refresh.access_token),
+            #     },
+            # )
+            #
+            #
+            #
 
             if access_token:
                 # Validate the access token before fetching profile data
