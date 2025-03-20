@@ -29,10 +29,11 @@ class UserDetailSerializer(serializers.ModelSerializer):
         return False
 
     def get_subscriptions_detail(self, obj):
-        if obj.user_subscription and obj.user_subscription.is_active:
-            stripe.api_key = settings.STRIPE_API_KEY
-            subscription = stripe.Subscription.retrieve(obj.user_subscription.stripe_subscription_id)
-            return subscription
+        if obj.user_subscription:
+            if obj.user_subscription.is_active:
+                stripe.api_key = settings.STRIPE_API_KEY
+                subscription = stripe.Subscription.retrieve(obj.user_subscription.stripe_subscription_id)
+                return subscription
         return {}
 
     def get_token_usage(self, obj):
