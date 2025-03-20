@@ -1,6 +1,6 @@
 from django.conf import settings
 from rest_framework import serializers
-from users.models import User, UserApiUsage
+from users.models import User, UserApiUsage, UserSubscription
 import stripe
 #
 # class GoogleAuthResponseSerializer(serializers.Serializer):
@@ -24,15 +24,17 @@ class UserDetailSerializer(serializers.ModelSerializer):
         fields = ('id', 'email', 'username', 'first_name', 'last_name', 'subscriptions', 'subscriptions_detail', 'token_usage')
 
     def get_subscriptions(self, obj):
-        if obj.user_subscription:
-            return obj.user_subscription.is_active
+        subscription = UserSubscription.objects.filter(user=obj).first()
+        if subscription:
+            return subscription.is_active
         return False
 
     def get_subscriptions_detail(self, obj):
-        if obj.user_subscription:
-            if obj.user_subscription.is_active:
+        subscription = UserSubscription.objects.filter(user=obj).first()
+        if subscription:
+            if subscription.is_active:
                 stripe.api_key = settings.STRIPE_API_KEY
-                subscription = stripe.Subscription.retrieve(obj.user_subscription.stripe_subscription_id)
+                subscription = stripe.Subscription.retrieve(subscription.stripe_subscription_id)
                 return subscription
         return {}
 
