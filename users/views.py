@@ -232,7 +232,7 @@ class CancelStripeSubscription(BaseAPIView, CreateAPIView):
     serializer_class = None
 
     def create(self, request, *args, **kwargs):
-        stripe.api_key = settings.STRIPE_API_KEY
+        stripe.api_key = 'sk_test_51PNWpDBld7c7zRyojkuiogUHdGAm71dm01vCVs5vLb6lUIq2hUb75FOetDeYF5PVcZosungflo7yrbqiD8Yc09qb00tDyVWgvw'
         user = request.user
         if user.user_subscription:
             subscription_id = user.user_subscription.stripe_subscription_id
