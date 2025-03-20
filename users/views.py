@@ -232,17 +232,20 @@ class CancelStripeSubscription(BaseAPIView, CreateAPIView):
     serializer_class = None
 
     def create(self, request, *args, **kwargs):
-        stripe.api_key = 'sk_test_51PNWpDBld7c7zRyojkuiogUHdGAm71dm01vCVs5vLb6lUIq2hUb75FOetDeYF5PVcZosungflo7yrbqiD8Yc09qb00tDyVWgvw'
-        user = request.user
-        if user.user_subscription:
-            subscription_id = user.user_subscription.stripe_subscription_id
-            stripe.Subscription.delete(subscription_id)
-            user.user_subscription.is_active = False
-            user.user_subscription.save()
-            api_usage = UserApiUsage.objects.filter(user=user).first()
-            if api_usage:
-                api_usage.remaining_limit = 1000
-                api_usage.total_limit = 100
-                api_usage.save()
-            return self.send_success_response(message="Subscription cancelled.")
-        return self.send_bad_request_response(message="Subscription can't be cancelled.")
+        try:
+            stripe.api_key = 'sk_test_51PNWpDBld7c7zRyojkuiogUHdGAm71dm01vCVs5vLb6lUIq2hUb75FOetDeYF5PVcZosungflo7yrbqiD8Yc09qb00tDyVWgvw'
+            user = request.user
+            if user.user_subscription:
+                subscription_id = user.user_subscription.stripe_subscription_id
+                stripe.Subscription.delete(subscription_id)
+                user.user_subscription.is_active = False
+                user.user_subscription.save()
+                api_usage = UserApiUsage.objects.filter(user=user).first()
+                if api_usage:
+                    api_usage.remaining_limit = 1000
+                    api_usage.total_limit = 100
+                    api_usage.save()
+                return self.send_success_response(message="Subscription cancelled.")
+            return self.send_bad_request_response(message="Subscription can't be cancelled.")
+        except Exception as e:
+            return self.send_bad_request_response(message=str(e))
