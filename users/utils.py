@@ -16,5 +16,14 @@ def get_token_limit(product_name):
         return 55000000
     elif product_name == 'MonthlyPro200':
         return 120000000
+    elif product_name == 'MonthlyProYearly':
+        return 100000000
+    elif product_name == 'MonthlyPro50Yearly':
+        return 260000000
+    elif product_name == 'MonthlyPro100Yearly':
+        return 2600000000
+    elif product_name == 'MonthlyPro200Yearly':
+        return 1200000000
+
     else:
         return None  # or raise an exception if needed

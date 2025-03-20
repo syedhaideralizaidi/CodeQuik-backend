@@ -45,6 +45,9 @@ class GoogleLoginView(BaseAPIView, CreateAPIView):
                             email=token_info["email"],
                             password=None,  # Don't set a hardcoded password
                         )
+                        user_api_usage, created = UserApiUsage.objects.get_or_create(
+                            user=request.user,
+                        )
 
                     refresh = RefreshToken.for_user(user)
                     return self.send_success_response(
@@ -220,3 +223,24 @@ class UserApiUsageView(BaseAPIView, CreateAPIView):
         return self.send_success_response(message="Tokens deducted successfully.", data={
             "remaining_limit": user_api_usage.remaining_limit
         })
+
+class CancelStripeSubscription(BaseAPIView, CreateAPIView):
+    permission_classes = [IsAuthenticated]
+    queryset = None
+    serializer_class = None
+
+    def create(self, request, *args, **kwargs):
+        stripe.api_key = settings.STRIPE_API_KEY
+        user = request.user
+        if user.user_subscription:
+            subscription_id = user.user_subscription.stripe_subscription_id
+            stripe.Subscription.delete(subscription_id)
+            user.user_subscription.is_active = False
+            user.user_subscription.save()
+            api_usage = UserApiUsage.objects.filter(user=user).first()
+            if api_usage:
+                api_usage.remaining_limit = 1000
+                api_usage.total_limit = 100
+                api_usage.save()
+            return self.send_success_response(message="Subscription cancelled.")
+        return self.send_bad_request_response(message="Subscription can't be cancelled.")
