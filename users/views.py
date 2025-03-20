@@ -174,9 +174,11 @@ class StripeWebhookView(CreateAPIView):
             )
             api_limit = get_token_limit(product_name)
             UserApiUsage.objects.update_or_create(
-                user=user,
-                total_limit=api_limit,
-                remaining_limit=api_limit,
+                user=user,  # This is the lookup field to match an existing record
+                defaults={
+                    'total_limit': api_limit,
+                    'remaining_limit': api_limit,
+                }
             )
             # Store subscription details in the database
             UserSubscription.objects.update_or_create(
