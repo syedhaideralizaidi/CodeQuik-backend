@@ -7,7 +7,8 @@ import stripe
 from users.models import User, UserSubscription, UserTransaction, UserApiUsage
 from users.serializers import UserDetailSerializer
 from users.utils import validate_google_token, get_token_limit
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
+
 
 class GoogleLoginView(BaseAPIView, CreateAPIView):
     def create(self, request, *args, **kwargs):
@@ -67,6 +68,29 @@ class GoogleLoginView(BaseAPIView, CreateAPIView):
                 )
         except Exception as e:
             return self.send_bad_request_response(message=str(e))
+
+
+
+class RefreshAccessTokenView(BaseAPIView, CreateAPIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        try:
+            refresh_token = request.data.get("refresh_token")
+
+            if not refresh_token:
+                return self.send_bad_request_response(message="No refresh token provided.")
+
+            # Validate and generate a new access token
+            refresh = RefreshToken(refresh_token)
+            access_token = str(refresh.access_token)
+            return self.send_success_response(data={
+                "access_token": access_token,
+            })
+
+        except Exception as e:
+            return self.send_bad_request_response(message=str(e))
+
 
 
 class StripeProductListing(BaseAPIView, ListAPIView):
