@@ -9,21 +9,21 @@ def validate_google_token(access_token):
 
 def get_token_limit(product_name):
     if product_name == 'MonthlyPro':
-        return 10000000
+        return 5000000
     elif product_name == 'MonthlyPro50':
         return 26000000
     elif product_name == 'MonthlyPro100':
         return 55000000
     elif product_name == 'MonthlyPro200':
         return 120000000
-    elif product_name == 'MonthlyProYearly':
+    elif product_name == 'Yearly Pro -10M':
         return 100000000
-    elif product_name == 'MonthlyPro50Yearly':
-        return 260000000
-    elif product_name == 'MonthlyPro100Yearly':
-        return 2600000000
-    elif product_name == 'MonthlyPro200Yearly':
-        return 1200000000
+    elif product_name == 'Yearly Pro 50 - 100M':
+        return 100000000
+    elif product_name == 'Yearly Pro 100 - 200M':
+        return 200000000
+    elif product_name == 'Yearly Pro 200 - 400M':
+        return 400000000
 
     else:
         return None  # or raise an exception if needed
